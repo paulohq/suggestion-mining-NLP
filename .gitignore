@@ -1,0 +1,15 @@
+*.zip
+*.pdf
+*.xml
+*.gz
+*.json
+*.csv
+arquivos/*
+.idea/*
+.idea
+cmake-build-debug
+*.out
+*.o
+.virtualenv/*
+Subtask-A-master*/*
+Subtask-B-master*/*
