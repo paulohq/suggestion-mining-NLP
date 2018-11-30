@@ -45,7 +45,7 @@ def remove_characters_after_tokenization(token_list):
     pattern = re.compile('[{}]'.format(re.escape(string.punctuation)))
     for tokens in token_list:
         for token in tokens:
-            filtered_tokens = [filter(None, [pattern.sub('', token)])]
+            filtered_tokens = list([filter(None, [pattern.sub('', token)])])
     #filtered_tokens = filter(None, [pattern.sub('', token) for token in token_list])
     return filtered_tokens
 
