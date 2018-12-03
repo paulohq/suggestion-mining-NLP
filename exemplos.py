@@ -3,7 +3,8 @@ import re
 import string
 from pprint import pprint
 from nltk.corpus import wordnet
-
+from nltk.stem import LancasterStemmer
+from nltk.stem import WordNetLemmatizer
 
 corpus = ["The brown fox wasn't that quick and he couldn't win the race.''",
 "Hey that's a great deal! I just not bought a phone for $199 ",
@@ -14,6 +15,7 @@ filtered_list = []
 filtered_list_lowercase = []
 filtered_list_remove_stopwords = []
 filtered_list_remove_repeated_characters = []
+filtered_list_stemmer = []
 
 def tokenize_text(text):
     sentences = nltk.sent_tokenize(text)
@@ -50,6 +52,11 @@ def remove_repeated_characters(tokens):
     correct_tokens = [replace(word) for word in tokens]
     return correct_tokens
 
+def lancaster_stemmer(tokens):
+    ls = LancasterStemmer()
+    filtered_tokens = [ls.stem(token) for token in tokens]
+    return filtered_tokens
+
 token_list = [tokenize_text(text) for text in corpus]
 
 pprint(token_list)
@@ -63,14 +70,14 @@ for sentence_tokens in token_list:
     for tokens in sentence_tokens:
         filtered_list.append(list(filter(None, [remove_characters_after_tokenization(tokens)])))
 #Print list after remove special characters.
-print(filtered_list)
+#print(filtered_list)
 
 #Loop to convert words in filtered_list to lowercase.
 for sentence_tokens in filtered_list:
     for tokens in sentence_tokens:
         filtered_list_lowercase.append(list(filter(None, [lower_case(tokens)])))
 #Print list after convert to lowercase.
-print(filtered_list_lowercase)
+#print(filtered_list_lowercase)
 
 #Loop to remove the stopwords from the list filtered_list_lowercase
 for sentence_tokens in filtered_list_lowercase:
@@ -78,7 +85,7 @@ for sentence_tokens in filtered_list_lowercase:
         filtered_list_remove_stopwords.append(list(filter(None, [remove_stopwords(tokens)])))
 
 #Print list after remove stopwords
-print (filtered_list_remove_stopwords)
+#print (filtered_list_remove_stopwords)
 
 #Loop to remove the repeated characters from the list filtered_list_remove_stopwords.
 for sentence_tokens in filtered_list_remove_stopwords:
@@ -86,3 +93,10 @@ for sentence_tokens in filtered_list_remove_stopwords:
         filtered_list_remove_repeated_characters.append(list(filter(None, [remove_repeated_characters(tokens)])))
 #Print list after remove repeated characters.
 print(filtered_list_remove_repeated_characters)
+
+#Loop to stemming.
+for sentence_tokens in filtered_list_remove_repeated_characters:
+    for tokens in sentence_tokens:
+        filtered_list_stemmer.append(list(filter(None, [lancaster_stemmer(tokens)])))
+#Print list after stemming.
+print(filtered_list_stemmer)

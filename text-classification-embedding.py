@@ -8,6 +8,7 @@ import re
 import string
 import tkinter
 from nltk.corpus import wordnet
+from nltk.stem import LancasterStemmer
 
 #train = file_reader = csv.reader(open(data_path, "rt", errors="ignore", encoding="utf-8"), delimiter=',')
 data_path = "/home/paulo/PycharmProjects/suggestion-mining/training-full-v13-bkp.csv"
@@ -17,6 +18,7 @@ filtered_list = []
 filtered_list_lowercase = []
 filtered_list_remove_stopwords = []
 filtered_list_remove_repeated_characters = []
+filtered_list_stemmer = []
 
 # Reads a given CSV and stores the data in a list
 def read_csv(data_path):
@@ -89,6 +91,12 @@ def remove_repeated_characters(tokens):
     correct_tokens = [replace(word) for word in tokens]
     return correct_tokens
 
+#Stemming the tokens.
+def lancaster_stemmer(tokens):
+    ls = LancasterStemmer()
+    filtered_tokens = [ls.stem(token) for token in tokens]
+    return filtered_tokens
+
 sent_list = read_csv(data_path)
 #sent_tokenize(sent_list)
 #word_tokenize(sent_list)
@@ -127,3 +135,9 @@ for sentence_tokens in filtered_list_remove_repeated_characters:
     for tokens in sentence_tokens:
       print(tokens)
 
+#Loop to stemming.
+for sentence_tokens in filtered_list_remove_repeated_characters:
+    for tokens in sentence_tokens:
+        filtered_list_stemmer.append(list(filter(None, [lancaster_stemmer(tokens)])))
+#Print list after stemming.
+print(filtered_list_stemmer)
