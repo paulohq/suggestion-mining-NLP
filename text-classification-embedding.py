@@ -7,8 +7,12 @@ from pprint import pprint
 import re
 import string
 import tkinter
-from nltk.corpus import wordnet
+from nltk.corpus import wordnet # To get words in dictionary with their parts of speech
 from nltk.stem import LancasterStemmer
+from nltk.stem import WordNetLemmatizer
+from nltk import pos_tag
+
+from collections import Counter
 
 #train = file_reader = csv.reader(open(data_path, "rt", errors="ignore", encoding="utf-8"), delimiter=',')
 data_path = "/home/paulo/PycharmProjects/suggestion-mining/training-full-v13-bkp.csv"
@@ -19,6 +23,7 @@ filtered_list_lowercase = []
 filtered_list_remove_stopwords = []
 filtered_list_remove_repeated_characters = []
 filtered_list_stemmer = []
+filtered_list_lemma = []
 
 # Reads a given CSV and stores the data in a list
 def read_csv(data_path):
@@ -97,6 +102,40 @@ def lancaster_stemmer(tokens):
     filtered_tokens = [ls.stem(token) for token in tokens]
     return filtered_tokens
 
+#POS-tag token
+def get_pos(word):
+    w_synsets = wordnet.synsets(word)
+
+    pos_counts = Counter()
+    pos_counts["n"] = len([item for item in w_synsets if item.pos() == "n"])
+    pos_counts["v"] = len([item for item in w_synsets if item.pos() == "v"])
+    pos_counts["a"] = len([item for item in w_synsets if item.pos() == "a"])
+    pos_counts["r"] = len([item for item in w_synsets if item.pos() == "r"])
+
+    most_common_pos_list = pos_counts.most_common(3)
+    return most_common_pos_list[0][0]  # first indexer for getting the top POS from list, second indexer for getting POS from tuple( POS: count )
+
+
+#Convert the tokens to your radical (root word) using tokens POS-tag before lemmatizing.
+def lemmatizer(tokens):
+    wnl = WordNetLemmatizer()
+
+    def POS_tag(token):
+        tag = pos_tag(token)
+        wntag = tag[0].lower()
+        wntag = wntag if wntag in ['a', 'r', 'n', 'v'] else None
+        return wntag
+
+    #for token, tag in pos_tag(tokens):
+    #    wntag = tag[0].lower()
+    #    wntag = wntag if wntag in ['a', 'r', 'n', 'v'] else None
+        #lemma = wnl.lemmatize(token, wntag) if wntag else token
+
+    lemma_tokens = [wnl.lemmatize(token, get_pos(token)) for token in tokens]
+
+    #lemma_tokens = [wnl.lemmatize(token, POS_tag(token)) if POS_tag(token) else token for token in tokens]
+    return lemma_tokens
+
 sent_list = read_csv(data_path)
 #sent_tokenize(sent_list)
 #word_tokenize(sent_list)
@@ -109,14 +148,14 @@ for sentence_tokens in token_list:
     for tokens in sentence_tokens:
         filtered_list.append(list(filter(None, [remove_characters_after_tokenization(tokens)])))
 #Print list after remove special characters.
-print(filtered_list)
+#print(filtered_list)
 
 #Loop to convert words in filtered_list to lowercase.
 for sentence_tokens in filtered_list:
     for tokens in sentence_tokens:
         filtered_list_lowercase.append(list(filter(None, [lower_case(tokens)])))
 #Print list after convert to lowercase.
-print(filtered_list_lowercase)
+#print(filtered_list_lowercase)
 
 #Loop to remove the stopwords from the list filtered_list_lowercase
 for sentence_tokens in filtered_list_lowercase:
@@ -124,7 +163,7 @@ for sentence_tokens in filtered_list_lowercase:
         filtered_list_remove_stopwords.append(list(filter(None, [remove_stopwords(tokens)])))
 
 #Print list after remove stopwords
-print (filtered_list_remove_stopwords)
+#print (filtered_list_remove_stopwords)
 
 #Loop to remove the repeated characters from the list filtered_list_remove_stopwords.
 for sentence_tokens in filtered_list_remove_stopwords:
@@ -140,4 +179,12 @@ for sentence_tokens in filtered_list_remove_repeated_characters:
     for tokens in sentence_tokens:
         filtered_list_stemmer.append(list(filter(None, [lancaster_stemmer(tokens)])))
 #Print list after stemming.
-print(filtered_list_stemmer)
+#print(filtered_list_stemmer)
+
+
+
+for sentence_tokens in filtered_list_remove_repeated_characters:
+    for tokens in sentence_tokens:
+        filtered_list_lemma.append(list(filter(None, [lemmatizer(tokens)])))
+
+print(filtered_list_lemma)

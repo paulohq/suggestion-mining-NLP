@@ -4,7 +4,14 @@ import string
 from pprint import pprint
 from nltk.corpus import wordnet
 from nltk.stem import LancasterStemmer
-from nltk.stem import WordNetLemmatizer
+from nltk.stem import WordNetLemmatizer # lemmatizes word based on it's parts of speech
+from nltk import pos_tag, word_tokenize
+
+from collections import Counter
+
+from nltk.corpus import wordnet # To get words in dictionary with their parts of speech
+
+
 
 corpus = ["The brown fox wasn't that quick and he couldn't win the race.''",
 "Hey that's a great deal! I just not bought a phone for $199 ",
@@ -16,6 +23,7 @@ filtered_list_lowercase = []
 filtered_list_remove_stopwords = []
 filtered_list_remove_repeated_characters = []
 filtered_list_stemmer = []
+filtered_list_lemma = []
 
 def tokenize_text(text):
     sentences = nltk.sent_tokenize(text)
@@ -56,6 +64,40 @@ def lancaster_stemmer(tokens):
     ls = LancasterStemmer()
     filtered_tokens = [ls.stem(token) for token in tokens]
     return filtered_tokens
+
+
+def get_pos(word):
+    w_synsets = wordnet.synsets(word)
+
+    pos_counts = Counter()
+    pos_counts["n"] = len([item for item in w_synsets if item.pos() == "n"])
+    pos_counts["v"] = len([item for item in w_synsets if item.pos() == "v"])
+    pos_counts["a"] = len([item for item in w_synsets if item.pos() == "a"])
+    pos_counts["r"] = len([item for item in w_synsets if item.pos() == "r"])
+
+    most_common_pos_list = pos_counts.most_common(3)
+    return most_common_pos_list[0][0]  # first indexer for getting the top POS from list, second indexer for getting POS from tuple( POS: count )
+
+
+#Convert the tokens to your radical (root word) using tokens POS-tag before lemmatizing.
+def lemmatizer(tokens):
+    wnl = WordNetLemmatizer()
+
+    def POS_tag(token):
+        tag = pos_tag(token)
+        wntag = tag[0].lower()
+        wntag = wntag if wntag in ['a', 'r', 'n', 'v'] else None
+        return wntag
+
+    #for token, tag in pos_tag(tokens):
+    #    wntag = tag[0].lower()
+    #    wntag = wntag if wntag in ['a', 'r', 'n', 'v'] else None
+        #lemma = wnl.lemmatize(token, wntag) if wntag else token
+
+    lemma_tokens = [wnl.lemmatize(token, get_pos(token)) for token in tokens]
+
+    #lemma_tokens = [wnl.lemmatize(token, POS_tag(token)) if POS_tag(token) else token for token in tokens]
+    return lemma_tokens
 
 token_list = [tokenize_text(text) for text in corpus]
 
@@ -100,3 +142,9 @@ for sentence_tokens in filtered_list_remove_repeated_characters:
         filtered_list_stemmer.append(list(filter(None, [lancaster_stemmer(tokens)])))
 #Print list after stemming.
 print(filtered_list_stemmer)
+
+for sentence_tokens in filtered_list_remove_repeated_characters:
+    for tokens in sentence_tokens:
+        filtered_list_lemma.append(list(filter(None, [lemmatizer(tokens)])))
+
+print(filtered_list_lemma)
