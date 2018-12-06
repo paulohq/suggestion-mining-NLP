@@ -1,4 +1,4 @@
-#teste
+#http://www.norvig.com/spell-correct.html
 import re, collections
 from collections import Counter
 
@@ -7,7 +7,6 @@ class corretor_ortografico_norvig(object):
         self.WORDS = Counter(self.words(open('big.txt').read()))
 
     def words(self,text): return re.findall(r'\w+', text.lower())
-
 
 
     def P(self, word):
@@ -42,4 +41,4 @@ class corretor_ortografico_norvig(object):
         return (e2 for e1 in self.edits1(word) for e2 in self.edits1(e1))
 
 corretor = corretor_ortografico_norvig()
-print(corretor.correction('spellling'))
+#print(corretor.correction('spellling'))

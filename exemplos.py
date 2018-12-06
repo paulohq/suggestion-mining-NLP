@@ -8,9 +8,8 @@ from nltk.stem import WordNetLemmatizer # lemmatizes word based on it's parts of
 from nltk import pos_tag, word_tokenize
 import collections
 from collections import Counter
-from corretor_ortografico_norvig import *
-
 from nltk.corpus import wordnet # To get words in dictionary with their parts of speech
+from corretor_ortografico_norvig import *
 
 
 class exemplo(object):
@@ -20,6 +19,7 @@ class exemplo(object):
                     "@@You'll (learn) a **lot** in the book. Python is an amazinngggg language !@@",
                     "My schooool is realllllyyy amaaazingggg"]
 
+        self.list_spell_checker = []
         self.token_list = []
         self.filtered_list = []
         self.filtered_list_lowercase = []
@@ -102,6 +102,14 @@ class exemplo(object):
         #lemma_tokens = [wnl.lemmatize(token, POS_tag(token)) if POS_tag(token) else token for token in tokens]
         return lemma_tokens
 
+    #Speel checker the tokens.
+    def correction(self, tokens):
+        corretor = corretor_ortografico_norvig()
+        filtered_tokens = [corretor.correction(token) for token in tokens]
+
+        return filtered_tokens
+
+
 exem = exemplo()
 exem.token_list = [exem.tokenize_text(text) for text in exem.corpus]
 
@@ -140,15 +148,24 @@ for sentence_tokens in exem.filtered_list_remove_stopwords:
 #Print list after remove repeated characters.
 print(exem.filtered_list_remove_repeated_characters)
 
-#Loop to stemming.
+#Loop to spell checker.
 for sentence_tokens in exem.filtered_list_remove_repeated_characters:
     for tokens in sentence_tokens:
+        exem.list_spell_checker.append((list(filter(None, [exem.correction(tokens)]))))
+print('Speel checker:')
+print(exem.list_spell_checker)
+
+#Loop to stemming.
+for sentence_tokens in exem.list_spell_checker:
+    for tokens in sentence_tokens:
         exem.filtered_list_stemmer.append(list(filter(None, [exem.lancaster_stemmer(tokens)])))
+print('Stem:')
 #Print list after stemming.
 print(exem.filtered_list_stemmer)
 
-for sentence_tokens in exem.filtered_list_remove_repeated_characters:
+for sentence_tokens in exem.list_spell_checker:
     for tokens in sentence_tokens:
         exem.filtered_list_lemma.append(list(filter(None, [exem.lemmatizer(tokens)])))
 
+print('Lemma:')
 print(exem.filtered_list_lemma)

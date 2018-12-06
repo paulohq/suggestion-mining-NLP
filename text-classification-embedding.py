@@ -11,8 +11,8 @@ from nltk.corpus import wordnet # To get words in dictionary with their parts of
 from nltk.stem import LancasterStemmer
 from nltk.stem import WordNetLemmatizer
 from nltk import pos_tag
-
 from collections import Counter
+from corretor_ortografico_norvig import *
 
 class text_classification(object):
     def __init__(self):
@@ -26,6 +26,7 @@ class text_classification(object):
         self.filtered_list_lowercase = []
         self.filtered_list_remove_stopwords = []
         self.filtered_list_remove_repeated_characters = []
+        self.list_spell_checker = []
         self.filtered_list_stemmer = []
         self.filtered_list_lemma = []
 
@@ -141,6 +142,14 @@ class text_classification(object):
         #lemma_tokens = [wnl.lemmatize(token, POS_tag(token)) if POS_tag(token) else token for token in tokens]
         return lemma_tokens
 
+    #Speel checker the tokens.
+    def correction(self, tokens):
+        corretor = corretor_ortografico_norvig()
+        filtered_tokens = [corretor.correction(token) for token in tokens]
+
+        return filtered_tokens
+
+
 classifier = text_classification()
 classifier.sent_list = classifier.read_csv(classifier.data_path)
 #sent_tokenize(sent_list)
@@ -180,6 +189,13 @@ for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
     for tokens in sentence_tokens:
       print(tokens)
 
+# Loop to spell checker.
+for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
+    for tokens in sentence_tokens:
+        classifier.list_spell_checker.append((list(filter(None, [classifier.correction(tokens)]))))
+print('Speel checker:')
+print(classifier.list_spell_checker)
+
 #Loop to stemming.
 for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
     for tokens in sentence_tokens:
@@ -188,9 +204,9 @@ for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
 #print(filtered_list_stemmer)
 
 
-
+#Loop to lemmatize
 for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
     for tokens in sentence_tokens:
         classifier.filtered_list_lemma.append(list(filter(None, [classifier.lemmatizer(tokens)])))
-
+print('Lemma:')
 print(classifier.filtered_list_lemma)
