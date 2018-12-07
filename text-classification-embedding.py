@@ -102,6 +102,22 @@ class text_classification(object):
         correct_tokens = [replace(word) for word in tokens]
         return correct_tokens
 
+    def expand_contractions(text, contraction_mapping):
+        contractions_pattern = re.compile('({})'.format('|'.join(contraction_mapping.keys())),
+        flags = re.IGNORECASE | re.DOTALL)
+        def expand_match(contraction):
+            match = contraction.group(0)
+            first_char = match[0]
+            expanded_contraction = contraction_mapping.get(match) \
+                if contraction_mapping.get(match) \
+                else contraction_mapping.get(match.lower())
+            expanded_contraction = first_char + expanded_contraction[1:]
+            return expanded_contraction
+
+        expanded_text = contractions_pattern.sub(expand_match, text)
+        expanded_text = re.sub("'", "", expanded_text)
+        return expanded_text
+
     #Stemming the tokens.
     def lancaster_stemmer(self, tokens):
         ls = LancasterStemmer()
@@ -207,6 +223,6 @@ for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
 #Loop to lemmatize
 for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
     for tokens in sentence_tokens:
-        classifier.filtered_list_lemma.append(list(filter(None, [classifier.lemmatizer(tokens)])))
+        classifier.x .append(list(filter(None, [classifier.lemmatizer(tokens)])))
 print('Lemma:')
 print(classifier.filtered_list_lemma)
