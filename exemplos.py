@@ -12,6 +12,7 @@ from nltk.corpus import wordnet # To get words in dictionary with their parts of
 from corretor_ortografico_norvig import *
 
 from contractions import contractions_dict
+from feature_extraction import *
 
 
 class exemplo(object):
@@ -132,6 +133,12 @@ class exemplo(object):
 
         return filtered_tokens
 
+    def bow_extraction(self):
+        ext = feature_extraction()
+        bow_vectorizer, features, feature_names = ext.bow_extractor(exem.filtered_list_lemma)
+        df = ext.display_features()
+        print(df)
+
 
 exem = exemplo()
 print("Original corpus:")
@@ -201,3 +208,9 @@ for sentence_tokens in exem.filtered_list_remove_repeated_characters:
 
 print('Lemma:')
 print(exem.filtered_list_lemma)
+
+for reg in exem.filtered_list_lemma:
+    list.append(reg)
+
+print(list)
+#exem.bow_extraction()
