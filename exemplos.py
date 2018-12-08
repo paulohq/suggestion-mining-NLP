@@ -11,12 +11,12 @@ from collections import Counter
 from nltk.corpus import wordnet # To get words in dictionary with their parts of speech
 from corretor_ortografico_norvig import *
 
-from contractions import CONTRACTION_MAP
+from contractions import contractions_dict
 
 
 class exemplo(object):
     def __init__(self):
-        self.corpus = ["The brown fox wasn't that quick and he couldn't win the race.''",
+        self.corpus = ["i'm The brown fox wasn't that quick and he couldn't win the race.''",
                     "Hey that's a great deal! I just not bought a phone for $199 ",
                     "@@You'll (learn) a **lot** in the book. Python is an amazinngggg language !@@",
                     "My schooool is realllllyyy amaaazingggg"]
@@ -30,6 +30,26 @@ class exemplo(object):
         self.filtered_list_expand_contractions = []
         self.filtered_list_stemmer = []
         self.filtered_list_lemma = []
+
+    def expand_contractions(self, text, contraction_mapping):
+        contractions_pattern = re.compile('({})'.format('|'.join(contraction_mapping.keys())),
+        flags = re.IGNORECASE | re.DOTALL)
+        def expand_match(contraction):
+            match = contraction.group(0)
+            first_char = match[0]
+            #expanded_contraction = contraction_mapping.get(match) \
+            expanded_contraction = ""
+            if contraction_mapping.get(match):
+                expanded_contraction = contraction_mapping.get(match)
+            elif contraction_mapping.get(match.lower()):
+                expanded_contraction = contraction_mapping.get(match.lower())
+            expanded_contraction = first_char + expanded_contraction[1:]
+            return expanded_contraction
+
+
+        expanded_text = contractions_pattern.sub(expand_match, text)
+        expanded_text = re.sub("'", "", expanded_text)
+        return expanded_text
 
     def tokenize_text(self,text):
         sentences = nltk.sent_tokenize(text)
@@ -65,23 +85,6 @@ class exemplo(object):
 
         correct_tokens = [replace(word) for word in tokens]
         return correct_tokens
-
-    def expand_contractions(self, tokens, contraction_mapping):
-        contractions_pattern = re.compile('({})'.format('|'.join(contraction_mapping.keys())),
-        flags = re.IGNORECASE | re.DOTALL)
-        def expand_match(contraction):
-            match = contraction.group(0)
-            first_char = match[0]
-            expanded_contraction = contraction_mapping.get(match) \
-                if contraction_mapping.get(match) \
-                else contraction_mapping.get(match.lower())
-            expanded_contraction = first_char + expanded_contraction[1:]
-            return expanded_contraction
-
-
-        expanded_text = [contractions_pattern.sub(expand_match, token) for token in tokens]
-        expanded_text = re.sub("'", "", expanded_text)
-        return expanded_text
 
     def lancaster_stemmer(self, tokens):
         ls = LancasterStemmer()
@@ -131,9 +134,16 @@ class exemplo(object):
 
 
 exem = exemplo()
-exem.token_list = [exem.tokenize_text(text) for text in exem.corpus]
+print("Original corpus:")
+print(exem.corpus)
+exem.filtered_list_expand_contractions = [exem.expand_contractions(text, contractions_dict) for text in exem.corpus]
+print("Expand contractions:")
+print(exem.filtered_list_expand_contractions)
 
-pprint(exem.token_list)
+
+exem.token_list = [exem.tokenize_text(text) for text in exem.filtered_list_expand_contractions]
+print("Token List:")
+print(exem.token_list)
 
 #filtered_list_1 = [[remove_characters_after_tokenization(tokens)
 #                                for tokens in sentence_tokens]
@@ -166,29 +176,26 @@ for sentence_tokens in exem.filtered_list_remove_stopwords:
     for tokens in sentence_tokens:
         exem.filtered_list_remove_repeated_characters.append(list(filter(None, [exem.remove_repeated_characters(tokens)])))
 #Print list after remove repeated characters.
+print("Stopwords removal:")
 print(exem.filtered_list_remove_repeated_characters)
 
-for sentence_tokens in exem.filtered_list_remove_repeated_characters:
-    for tokens in sentence_tokens:
-        exem.filtered_list_expand_contractions = exem.expand_contractions(tokens, CONTRACTION_MAP)
-print(exem.filtered_list_expand_contractions)
 
 #Loop to spell checker.
-for sentence_tokens in exem.filtered_list_remove_repeated_characters:
-    for tokens in sentence_tokens:
-        exem.list_spell_checker.append((list(filter(None, [exem.correction(tokens)]))))
-print('Speel checker:')
-print(exem.list_spell_checker)
+#for sentence_tokens in exem.filtered_list_remove_repeated_characters:
+#    for tokens in sentence_tokens:
+#        exem.list_spell_checker.append((list(filter(None, [exem.correction(tokens)]))))
+#print('Speel checker:')
+#print(exem.list_spell_checker)
 
 #Loop to stemming.
-for sentence_tokens in exem.list_spell_checker:
+for sentence_tokens in exem.filtered_list_remove_repeated_characters:
     for tokens in sentence_tokens:
         exem.filtered_list_stemmer.append(list(filter(None, [exem.lancaster_stemmer(tokens)])))
 print('Stem:')
 #Print list after stemming.
 print(exem.filtered_list_stemmer)
 
-for sentence_tokens in exem.list_spell_checker:
+for sentence_tokens in exem.filtered_list_remove_repeated_characters:
     for tokens in sentence_tokens:
         exem.filtered_list_lemma.append(list(filter(None, [exem.lemmatizer(tokens)])))
 

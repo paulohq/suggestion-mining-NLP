@@ -13,6 +13,7 @@ from nltk.stem import WordNetLemmatizer
 from nltk import pos_tag
 from collections import Counter
 from corretor_ortografico_norvig import *
+from contractions import contractions_dict
 
 class text_classification(object):
     def __init__(self):
@@ -20,6 +21,7 @@ class text_classification(object):
         self.data_path = "/home/paulo/PycharmProjects/suggestion-mining/training-full-v13-bkp.csv"
         #train = pd.read_csv(data_path, header=0, sep=";", quotechar='"',quoting=3, encoding='utf-8')
 
+        self.filtered_list_expand_contractions = []
         self.sent_list = []
         self.token_list = []
         self.filtered_list = []
@@ -55,6 +57,29 @@ class text_classification(object):
         for sent in sent_list:
             token_list = [default_w(sent[1])]
             print(token_list[0])
+
+    #Expand the contractions in text.
+    def expand_contractions(self, text, contraction_mapping):
+        contractions_pattern = re.compile('({})'.format('|'.join(contraction_mapping.keys())),
+        flags = re.IGNORECASE | re.DOTALL)
+        def expand_match(contraction):
+            match = contraction.group(0)
+            first_char = match[0]
+            expanded_contraction = ""
+            if contraction_mapping.get(match):
+                expanded_contraction = contraction_mapping.get(match)
+            elif contraction_mapping.get(match.lower()):
+                expanded_contraction = contraction_mapping.get(match.lower())
+            expanded_contraction = first_char + expanded_contraction[1:]
+            return expanded_contraction
+
+        print(text)
+        if (text == "Not really sure where to put this, so i'm going to ask here."):
+            print(text)
+        expanded_text = contractions_pattern.sub(expand_match, text)
+        expanded_text = re.sub("'", "", expanded_text)
+        return expanded_text
+
 
     #Tokenize the sentence into words.
     def word_tokenize(self, sentence):
@@ -101,22 +126,6 @@ class text_classification(object):
 
         correct_tokens = [replace(word) for word in tokens]
         return correct_tokens
-
-    def expand_contractions(text, contraction_mapping):
-        contractions_pattern = re.compile('({})'.format('|'.join(contraction_mapping.keys())),
-        flags = re.IGNORECASE | re.DOTALL)
-        def expand_match(contraction):
-            match = contraction.group(0)
-            first_char = match[0]
-            expanded_contraction = contraction_mapping.get(match) \
-                if contraction_mapping.get(match) \
-                else contraction_mapping.get(match.lower())
-            expanded_contraction = first_char + expanded_contraction[1:]
-            return expanded_contraction
-
-        expanded_text = contractions_pattern.sub(expand_match, text)
-        expanded_text = re.sub("'", "", expanded_text)
-        return expanded_text
 
     #Stemming the tokens.
     def lancaster_stemmer(self, tokens):
@@ -170,7 +179,16 @@ classifier = text_classification()
 classifier.sent_list = classifier.read_csv(classifier.data_path)
 #sent_tokenize(sent_list)
 #word_tokenize(sent_list)
-classifier.token_list = [classifier.word_tokenize(sent[1]) for sent in classifier.sent_list]
+
+#print(classifier.sent_list[0][1])
+#for text in classifier.sent_list:
+#    print(text[1])
+
+classifier.filtered_list_expand_contractions = [classifier.expand_contractions(text[1], contractions_dict) for text in classifier.sent_list]
+print("Expand contractions:")
+print(classifier.filtered_list_expand_contractions)
+
+classifier.token_list = [classifier.word_tokenize(sent) for sent in classifier.filtered_list_expand_contractions]
 #Print list after execute word tokenize.
 #pprint(token_list)
 
@@ -206,16 +224,16 @@ for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
       print(tokens)
 
 # Loop to spell checker.
-for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
-    for tokens in sentence_tokens:
-        classifier.list_spell_checker.append((list(filter(None, [classifier.correction(tokens)]))))
-print('Speel checker:')
-print(classifier.list_spell_checker)
+#for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
+#    for tokens in sentence_tokens:
+#        classifier.list_spell_checker.append((list(filter(None, [classifier.correction(tokens)]))))
+#print('Speel checker:')
+#print(classifier.list_spell_checker)
 
 #Loop to stemming.
-for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
-    for tokens in sentence_tokens:
-        classifier.filtered_list_stemmer.append(list(filter(None, [classifier.lancaster_stemmer(tokens)])))
+#for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
+#    for tokens in sentence_tokens:
+#        classifier.filtered_list_stemmer.append(list(filter(None, [classifier.lancaster_stemmer(tokens)])))
 #Print list after stemming.
 #print(filtered_list_stemmer)
 
@@ -223,6 +241,6 @@ for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
 #Loop to lemmatize
 for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
     for tokens in sentence_tokens:
-        classifier.x .append(list(filter(None, [classifier.lemmatizer(tokens)])))
+        classifier.filtered_list_lemma.append(list(filter(None, [classifier.lemmatizer(tokens)])))
 print('Lemma:')
 print(classifier.filtered_list_lemma)
