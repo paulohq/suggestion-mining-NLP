@@ -14,6 +14,7 @@ from nltk import pos_tag
 from collections import Counter
 from corretor_ortografico_norvig import *
 from contractions import contractions_dict
+from feature_extraction import *
 
 class text_classification(object):
     def __init__(self):
@@ -31,6 +32,8 @@ class text_classification(object):
         self.list_spell_checker = []
         self.filtered_list_stemmer = []
         self.filtered_list_lemma = []
+
+        self.ext = []
 
     # Reads a given CSV and stores the data in a list
     def read_csv(self, data_path):
@@ -73,9 +76,6 @@ class text_classification(object):
             expanded_contraction = first_char + expanded_contraction[1:]
             return expanded_contraction
 
-        print(text)
-        if (text == "Not really sure where to put this, so i'm going to ask here."):
-            print(text)
         expanded_text = contractions_pattern.sub(expand_match, text)
         expanded_text = re.sub("'", "", expanded_text)
         return expanded_text
@@ -174,6 +174,22 @@ class text_classification(object):
 
         return filtered_tokens
 
+    #Bag of words extraction.
+    def bow_extraction(self, corpus):
+        self.ext = feature_extraction()
+        bow_vectorizer, features, feature_names = self.ext.bow_extractor(corpus)
+        df = self.ext.display_features(features, feature_names)
+        #print(df)
+
+    #TF-IDF extraction
+    def tfidf_extraction(self, corpus):
+        self.ext = feature_extraction()
+        bow_vectorizer, features, feature_names = self.ext.tfid_extractor(corpus)
+        df = self.ext.display_features(features, feature_names)
+
+    def tfidf_new_doc_features(self, new_doc):
+        nd_features, feature_names = self.ext.tfidf_new_doc_features(new_doc)
+        df = self.ext.display_features(nd_features, feature_names)
 
 classifier = text_classification()
 classifier.sent_list = classifier.read_csv(classifier.data_path)
@@ -219,9 +235,9 @@ for sentence_tokens in classifier.filtered_list_remove_stopwords:
     for tokens in sentence_tokens:
         classifier.filtered_list_remove_repeated_characters.append(list(filter(None, [classifier.remove_repeated_characters(tokens)])))
 #Print list after remove repeated characters.
-for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
-    for tokens in sentence_tokens:
-      print(tokens)
+#for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
+#    for tokens in sentence_tokens:
+#      print(tokens)
 
 # Loop to spell checker.
 #for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
@@ -244,3 +260,17 @@ for sentence_tokens in classifier.filtered_list_remove_repeated_characters:
         classifier.filtered_list_lemma.append(list(filter(None, [classifier.lemmatizer(tokens)])))
 print('Lemma:')
 print(classifier.filtered_list_lemma)
+
+text = ""
+corpus = []
+for reg in classifier.filtered_list_lemma:
+    for r in reg:
+        for i in r:
+            text = text + ' ' + i
+        corpus.append(text)
+        text = ""
+
+#classifier.bow_extraction(corpus)
+classifier.tfidf_extraction(corpus)
+new_doc = ['loving this blue sky today']
+classifier.tfidf_new_doc_features(new_doc)

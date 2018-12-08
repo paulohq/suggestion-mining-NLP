@@ -17,7 +17,7 @@ from feature_extraction import *
 
 class exemplo(object):
     def __init__(self):
-        self.corpus = ["i'm The brown fox wasn't that quick and he couldn't win the race.''",
+        self.corpus = ["i'm The brown brown fox wasn't that quick and he couldn't win the race.''",
                     "Hey that's a great deal! I just not bought a phone for $199 ",
                     "@@You'll (learn) a **lot** in the book. Python is an amazinngggg language !@@",
                     "My schooool is realllllyyy amaaazingggg"]
@@ -133,11 +133,17 @@ class exemplo(object):
 
         return filtered_tokens
 
-    def bow_extraction(self):
+    def bow_extraction(self, corpus):
         ext = feature_extraction()
-        bow_vectorizer, features, feature_names = ext.bow_extractor(exem.filtered_list_lemma)
+        bow_vectorizer, features, feature_names = ext.bow_extractor(corpus)
         df = ext.display_features()
-        print(df)
+        #print(df)
+
+    #TF-IDF extraction
+    def tfidf_extraction(self, corpus):
+        ext = feature_extraction()
+        bow_vectorizer, features, feature_names = ext.tfid_extractor(corpus)
+        df = ext.display_features()
 
 
 exem = exemplo()
@@ -209,8 +215,15 @@ for sentence_tokens in exem.filtered_list_remove_repeated_characters:
 print('Lemma:')
 print(exem.filtered_list_lemma)
 
+text = ""
+corpus = []
 for reg in exem.filtered_list_lemma:
-    list.append(reg)
+    for r in reg:
+        for i in r:
+            text = text + ' ' + i
+        corpus.append(text)
+        text = ""
 
-print(list)
-#exem.bow_extraction()
+print(corpus)
+exem.bow_extraction(corpus)
+exem.tfidf_extraction(corpus)
