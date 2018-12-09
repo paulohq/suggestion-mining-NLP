@@ -97,26 +97,67 @@ class feature_extraction(object):
         avg_word_vec_features = self.averaged_word_vectorizer(corpus=TOKENIZED_CORPUS, model=self.model, num_features=10)
         print(np.round(avg_word_vec_features, 3))
 
+    # define function to compute tfidf weighted averaged word vector for a document
+    def tfidf_wtd_avg_word_vectors(self,words, tfidf_vector, tfidf_vocabulary, model, num_features):
+        word_tfidfs = [tfidf_vector[0, tfidf_vocabulary.get(word)]
+                       if tfidf_vocabulary.get(word)
+                       else 0 for word in words]
+
+        word_tfidf_map = {word: tfidf_val for word, tfidf_val in zip(words, word_tfidfs)}
+        feature_vector = np.zeros((num_features,), dtype="float64")
+        vocabulary = set(model.wv.index2word)
+        wts = 0.
+        for word in words:
+            if word in vocabulary:
+                word_vector = model[word]
+                weighted_word_vector = word_tfidf_map[word] * word_vector
+                wts = wts + word_tfidf_map[word]
+                feature_vector = np.add(feature_vector, weighted_word_vector)
+        if wts:
+            feature_vector = np.divide(feature_vector, wts)
+        return feature_vector
+
+    # generalize above function for a corpus of documents
+    def tfidf_weighted_averaged_word_vectorizer(self, corpus, tfidf_vectors, tfidf_vocabulary, model, num_features):
+        docs_tfidfs = [(doc, doc_tfidf)
+                       for doc, doc_tfidf
+                       in zip(corpus, tfidf_vectors)]
+        features = [self.tfidf_wtd_avg_word_vectors(tokenized_sentence, tfidf, tfidf_vocabulary, model, num_features)
+        for tokenized_sentence, tfidf in docs_tfidfs]
+        return np.array(features)
 
 extract = feature_extraction()
 
-#CORPUS = [
-#'the sky is blue',
-#'sky is blue and sky is beautiful',
-#'the beautiful sky is so blue',
-#'i love blue cheese'
-#]
+CORPUS = [
+'the sky is blue',
+'sky is blue and sky is beautiful',
+'the beautiful sky is so blue',
+'i love blue cheese'
+]
 
-#new_doc = ['loving this blue sky today']
+new_doc = ['loving this blue sky today']
 
 # tokenize corpora
-#TOKENIZED_CORPUS = [nltk.word_tokenize(sentence)
-#                    for sentence in CORPUS]
-#tokenized_new_doc = [nltk.word_tokenize(sentence)
-#                    for sentence in new_doc]
+TOKENIZED_CORPUS = [nltk.word_tokenize(sentence)
+                    for sentence in CORPUS]
+tokenized_new_doc = [nltk.word_tokenize(sentence)
+                    for sentence in new_doc]
 # build the word2vec model on our training corpus
-#model = gensim.models.Word2Vec(TOKENIZED_CORPUS, size=10, window=10, min_count=2, sample=1e-3)
+model = gensim.models.Word2Vec(TOKENIZED_CORPUS, size=10, window=10, min_count=2, sample=1e-3)
 
+tfidf_vectorizer, tfidf_features, tfidf_feature_names = extract.tfid_extractor(CORPUS)
+# get tfidf weights and vocabulary from earlier results and compute result
+corpus_tfidf = tfidf_features
+vocab = tfidf_vectorizer.vocabulary_
+wt_tfidf_word_vec_features = extract.tfidf_weighted_averaged_word_vectorizer(corpus=TOKENIZED_CORPUS, tfidf_vectors=corpus_tfidf
+                                                                             ,tfidf_vocabulary=vocab, model=model,num_features=10)
+print (np.round(wt_tfidf_word_vec_features, 3))
+
+nd_tfidf, nd_features = extract.tfidf_new_doc_features(tokenized_new_doc)
+# compute avgd word vector for test new_doc
+nd_wt_tfidf_word_vec_features = extract.tfidf_weighted_averaged_word_vectorizer(corpus=tokenized_new_doc, tfidf_vectors=nd_tfidf
+                                                                        , tfidf_vocabulary=vocab, model=model, num_features=10)
+print (np.round(nd_wt_tfidf_word_vec_features, 3))
 #print(model['blue'])
 
 # get averaged word vectors for our training CORPUS
