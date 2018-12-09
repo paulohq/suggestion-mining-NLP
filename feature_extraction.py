@@ -2,6 +2,8 @@ from sklearn.feature_extraction.text import CountVectorizer
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfTransformer
+import nltk
+import gensim
 
 class feature_extraction(object):
     def __init__(self):
@@ -14,6 +16,8 @@ class feature_extraction(object):
         self.bow_features = []
         self.tfidf_trans = []
         self.tdidf_features = []
+
+        self.model = []
 
     def bow_extractor(self, CORPUS, ngram_range=(1, 1)):
         self.bow_vectorizer = CountVectorizer(min_df=1, ngram_range=ngram_range)
@@ -65,6 +69,34 @@ class feature_extraction(object):
         new_doc_features = new_doc_features.todense()
         return new_doc_features
 
+    # define function to average word vectors for a text document
+    def average_word_vectors(self, words, model, vocabulary, num_features):
+        feature_vector = np.zeros((num_features,), dtype="float64")
+        nwords = 0.
+        for word in words:
+            if word in vocabulary:
+                nwords = nwords + 1.
+                feature_vector = np.add(feature_vector, model[word])
+
+        if nwords:
+            feature_vector = np.divide(feature_vector, nwords)
+        return feature_vector
+
+    # generalize above function for a corpus of documents.
+    def averaged_word_vectorizer(self, corpus, model, num_features):
+        vocabulary = set(model.wv.index2word)
+        features = [self.average_word_vectors(tokenized_sentence, model, vocabulary,
+                                          num_features)
+                     for tokenized_sentence in corpus]
+        return np.array(features)
+
+    #Create the model word2vec.
+    def create_model_word2vec(self, TOKENIZED_CORPUS, size, window, min_count, sample):
+        self.model = gensim.models.Word2Vec(TOKENIZED_CORPUS, size=size, window=window, min_count=min_count, sample=sample)
+        # get averaged word vectors for our training CORPUS
+        avg_word_vec_features = self.averaged_word_vectorizer(corpus=TOKENIZED_CORPUS, model=self.model, num_features=10)
+        print(np.round(avg_word_vec_features, 3))
+
 
 extract = feature_extraction()
 
@@ -75,5 +107,22 @@ extract = feature_extraction()
 #'i love blue cheese'
 #]
 
+#new_doc = ['loving this blue sky today']
+
+# tokenize corpora
+#TOKENIZED_CORPUS = [nltk.word_tokenize(sentence)
+#                    for sentence in CORPUS]
+#tokenized_new_doc = [nltk.word_tokenize(sentence)
+#                    for sentence in new_doc]
+# build the word2vec model on our training corpus
+#model = gensim.models.Word2Vec(TOKENIZED_CORPUS, size=10, window=10, min_count=2, sample=1e-3)
+
+#print(model['blue'])
+
+# get averaged word vectors for our training CORPUS
+#avg_word_vec_features = extract.averaged_word_vectorizer(corpus=TOKENIZED_CORPUS, model=model, num_features=10)
+#print (np.round(avg_word_vec_features, 3))
+
 #extract.tfid_extractor(CORPUS)
 #extract.display_features(self.features, self.feature_names)
+

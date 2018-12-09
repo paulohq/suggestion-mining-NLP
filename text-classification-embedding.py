@@ -191,6 +191,11 @@ class text_classification(object):
         nd_features, feature_names = self.ext.tfidf_new_doc_features(new_doc)
         df = self.ext.display_features(nd_features, feature_names)
 
+    def create_model_word2vec(self, tokenized_corpus):
+        ext = feature_extraction()
+        ext.create_model_word2vec(tokenized_corpus, 10, 10, 2, 1e-3)
+
+
 classifier = text_classification()
 classifier.sent_list = classifier.read_csv(classifier.data_path)
 #sent_tokenize(sent_list)
@@ -274,3 +279,11 @@ for reg in classifier.filtered_list_lemma:
 classifier.tfidf_extraction(corpus)
 new_doc = ['loving this blue sky today']
 classifier.tfidf_new_doc_features(new_doc)
+
+#generates matrix to apply the word2vec model.
+corpus_w2v = []
+for reg in classifier.filtered_list_lemma:
+    for r in reg:
+        corpus_w2v.append(r)
+
+classifier.create_model_word2vec(corpus_w2v)

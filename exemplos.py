@@ -136,15 +136,18 @@ class exemplo(object):
     def bow_extraction(self, corpus):
         ext = feature_extraction()
         bow_vectorizer, features, feature_names = ext.bow_extractor(corpus)
-        df = ext.display_features()
+        df = ext.display_features(features, feature_names)
         #print(df)
 
     #TF-IDF extraction
     def tfidf_extraction(self, corpus):
         ext = feature_extraction()
         bow_vectorizer, features, feature_names = ext.tfid_extractor(corpus)
-        df = ext.display_features()
+        df = ext.display_features(features, feature_names)
 
+    def create_model_word2vec(self, tokenized_corpus):
+        ext = feature_extraction()
+        ext.create_model_word2vec(tokenized_corpus, 10, 10, 2, 1e-3)
 
 exem = exemplo()
 print("Original corpus:")
@@ -215,6 +218,7 @@ for sentence_tokens in exem.filtered_list_remove_repeated_characters:
 print('Lemma:')
 print(exem.filtered_list_lemma)
 
+#generate vector with the sentences to apply tf-idf model.
 text = ""
 corpus = []
 for reg in exem.filtered_list_lemma:
@@ -227,3 +231,11 @@ for reg in exem.filtered_list_lemma:
 print(corpus)
 exem.bow_extraction(corpus)
 exem.tfidf_extraction(corpus)
+
+#generates matrix to apply the word2vec model.
+corpus1 = []
+for reg in exem.filtered_list_lemma:
+    for r in reg:
+        corpus1.append(r)
+
+exem.create_model_word2vec(corpus1)
