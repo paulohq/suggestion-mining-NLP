@@ -133,17 +133,34 @@ class exemplo(object):
 
         return filtered_tokens
 
-    def bow_extraction(self, corpus):
-        ext = feature_extraction()
-        bow_vectorizer, features, feature_names = ext.bow_extractor(corpus)
+    def bow_extraction(self, corpus, ext):
+
+        bow_vectorizer, bow_features = ext.bow_extractor(corpus)
+        features = bow_features.todense()
+        feature_names = bow_vectorizer.get_feature_names()
         df = ext.display_features(features, feature_names)
+        return bow_vectorizer, bow_features
+
         #print(df)
 
     #TF-IDF extraction
-    def tfidf_extraction(self, corpus):
-        ext = feature_extraction()
-        bow_vectorizer, features, feature_names = ext.tfid_extractor(corpus)
+    def tfidf_extraction(self, corpus, ext, bow_vectorizer, bow_features):
+        #ext = feature_extraction()
+        #bow_vectorizer, bow_features = ext.bow_extractor(corpus)
+
+        feature_names = bow_vectorizer.get_feature_names()
+        tfidf_trans, tfidf_features = ext.tfidf_transformer(bow_features)
+        features = np.round(tfidf_features.todense(), 2)
+
+        #bow_vectorizer, features, feature_names = ext.tfid_extractor(corpus)
         df = ext.display_features(features, feature_names)
+        return tfidf_trans, tfidf_features
+
+    def tfidf_extraction_directly(self, ext, corpus):
+        tfidf_vectorizer, tdidf_features = ext.tfidf_extractor(corpus)
+        feature_names = bow_vectorizer.get_feature_names()
+        ext.display_features(np.round(tdidf_features.todense(), 2), feature_names)
+
 
     def create_model_word2vec(self, tokenized_corpus):
         ext = feature_extraction()
@@ -228,14 +245,39 @@ for reg in exem.filtered_list_lemma:
         corpus.append(text)
         text = ""
 
-print(corpus)
-exem.bow_extraction(corpus)
-exem.tfidf_extraction(corpus)
+ext = feature_extraction()
+#print(corpus)
+print('bow extraction')
+bow_vectorizer, bow_features = exem.bow_extraction(corpus, ext)
+print('tf-idf transform')
+tfidf_trans, tfidf_features = exem.tfidf_extraction(corpus, ext, bow_vectorizer, bow_features)
+
+print('tf-idf directly:')
+exem.tfidf_extraction_directly(ext, corpus)
+
 
 #generates matrix to apply the word2vec model.
-corpus1 = []
+corpus_w2v = []
 for reg in exem.filtered_list_lemma:
     for r in reg:
-        corpus1.append(r)
+        corpus_w2v.append(r)
+#print('word2vec model')
+#exem.create_model_word2vec(corpus1)
+print('word2vec')
+# build the word2vec model on our training corpus
+model = ext.create_model_word2vec(corpus_w2v, size=10, window=10, min_count=2, sample=1e-3)
 
-exem.create_model_word2vec(corpus1)
+# get averaged word vectors for our training CORPUS
+avg_word_vec_features = extract.averaged_word_vectorizer(corpus=corpus_w2v, model=model, num_features=10)
+print (np.round(avg_word_vec_features, 3))
+avg_word_vec_features_new_doc = extract.averaged_word_vectorizer(corpus=new_doc, model=model, num_features=10)
+print (np.round(avg_word_vec_features_new_doc, 3))
+
+print('tfidf_weighted_averaged:')
+tfidf_vectorizer, tfidf_features = ext.tfidf_extractor(corpus)
+#get tfidf weights and vocabulary from earlier results and compute result
+corpus_tfidf = tfidf_features
+vocab = tfidf_vectorizer.vocabulary_
+wt_tfidf_word_vec_features = ext.tfidf_weighted_averaged_word_vectorizer(corpus=corpus_w2v, tfidf_vectors=corpus_tfidf
+                                                                             ,tfidf_vocabulary=vocab, model=model,num_features=10)
+print (np.round(wt_tfidf_word_vec_features, 3))
