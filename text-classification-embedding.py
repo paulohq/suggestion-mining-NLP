@@ -1,17 +1,5 @@
 # Import the pandas package, then use the "read_csv" function to read
 # the labeled training data
-import nltk
-from pprint import pprint
-import re
-import string
-import tkinter
-from nltk.corpus import wordnet # To get words in dictionary with their parts of speech
-from nltk.stem import LancasterStemmer
-from nltk.stem import WordNetLemmatizer
-from nltk import pos_tag
-from collections import Counter
-from corretor_ortografico_norvig import *
-from contractions import contractions_dict
 from feature_extraction import *
 from pre_processing import *
 from read_csv import *
