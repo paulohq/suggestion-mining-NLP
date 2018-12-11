@@ -127,24 +127,51 @@ svm = SGDClassifier(loss='hinge', n_iter=100)
 # Multinomial Naive Bayes with bag of words features
 mnb_bow_predictions = train_predict_evaluate_model(classifier=mnb, train_features=bow_train_features, train_labels=train_labels,
                                                    test_features=bow_test_features, test_labels=test_labels)
+print(mnb_bow_predictions)
 
 # Support Vector Machine with bag of words features
 svm_bow_predictions = train_predict_evaluate_model(classifier=svm,train_features=bow_train_features,train_labels=train_labels,
                                                              test_features=bow_test_features,test_labels=test_labels)
+print (svm_bow_predictions)
 
 # Multinomial Naive Bayes with tfidf features
 mnb_tfidf_predictions = train_predict_evaluate_model(classifier=mnb,train_features=tfidf_train_features, train_labels=train_labels,
                                                      test_features=tfidf_test_features,test_labels=test_labels)
+print(mnb_tfidf_predictions)
 
 # Support Vector Machine with tfidf features
 svm_tfidf_predictions = train_predict_evaluate_model(classifier=svm,train_features=tfidf_train_features,train_labels=train_labels,
                                                     test_features=tfidf_test_features,test_labels=test_labels)
+print(svm_tfidf_predictions)
 
 # Support Vector Machine with averaged word vector features
 svm_avgwv_predictions = train_predict_evaluate_model(classifier=svm,train_features=avg_wv_train_features,train_labels=train_labels,
                                                     test_features=avg_wv_test_features,test_labels=test_labels)
+print(svm_avgwv_predictions)
 
 
 # Support Vector Machine with tfidf weighted averaged word vector features
 svm_tfidfwv_predictions = train_predict_evaluate_model(classifier=svm,train_features=tfidf_wv_train_features,
                                                       train_labels=train_labels, test_features=tfidf_wv_test_features,test_labels=test_labels)
+print(svm_tfidfwv_predictions)
+
+
+cm = metrics.confusion_matrix(test_labels, svm_tfidf_predictions)
+print(pd.DataFrame(cm, index=range(0,20), columns=range(0,20)))
+
+class_names = dataset.target_names
+print (class_names[0], '->', class_names[15])
+print (class_names[18], '->', class_names[16] )
+print (class_names[19], '->', class_names[15])
+
+num = 0
+for document, label, predicted_label in zip(test_corpus, test_labels, svm_tfidf_predictions):
+    if label == 0 and predicted_label == 15:
+        print ('Actual Label:', class_names[label])
+        print ('Predicted Label:', class_names[predicted_label])
+        print ('Document:-')
+        print (re.sub('\n', ' ', document))
+        print ('')
+        num += 1
+        if num == 4:
+            break
