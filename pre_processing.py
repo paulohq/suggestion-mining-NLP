@@ -13,8 +13,9 @@ from nltk.stem import WordNetLemmatizer
 from nltk import pos_tag
 from collections import Counter
 from corretor_ortografico_norvig import *
-from contractions import contractions_dict
+
 from feature_extraction import *
+from contractions import contractions_dict
 
 class pre_processing(object):
     def __init__(self):
@@ -139,6 +140,19 @@ class pre_processing(object):
         filtered_tokens = [corretor.correction(token) for token in tokens]
 
         return filtered_tokens
+
+    def normalize_corpus(self, corpus, tokenize=False):
+        normalized_corpus = []
+        for text in corpus:
+            text = self.expand_contractions(text, contractions_dict)
+
+            text = self.word_tokenize(text)
+            text = self.remove_characters_after_tokenization(text)
+            text = self.lemmatizer(text)
+            text = self.remove_stopwords(text)
+            normalized_corpus.append(text)
+
+        return normalized_corpus
 
     # Bag of words extraction.
     def bow_extraction(self, corpus, ext):

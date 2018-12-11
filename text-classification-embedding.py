@@ -3,6 +3,7 @@
 from feature_extraction import *
 from pre_processing import *
 from read_csv import *
+from contractions import contractions_dict
 
 class text_classification(object):
     def __init__(self):

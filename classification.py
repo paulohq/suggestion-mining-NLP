@@ -1,6 +1,6 @@
 from sklearn.datasets import fetch_20newsgroups
-from sklearn.cross_validation import train_test_split
-from normalization import normalize_corpus
+from sklearn.model_selection import train_test_split
+from pre_processing import *
 
 from feature_extraction import *
 import nltk
@@ -69,6 +69,8 @@ def train_predict_evaluate_model(classifier,
                 predicted_labels=predictions)
     return predictions
 
+proc = pre_processing()
+
 dataset = get_data()
 print (dataset.target_names)
 corpus, labels = dataset.data, dataset.target
@@ -81,8 +83,8 @@ print ('Actual class label:', dataset.target_names[labels[10]])
 # prepare train and test datasets
 train_corpus, test_corpus, train_labels, test_labels = prepare_datasets(corpus, labels, test_data_proportion=0.3)
 
-norm_train_corpus = normalize_corpus(train_corpus)
-norm_test_corpus = normalize_corpus(test_corpus)
+norm_train_corpus = proc.normalize_corpus(train_corpus)
+norm_test_corpus = proc.normalize_corpus(test_corpus)
 
 extract = feature_extraction()
 # bag of words features
