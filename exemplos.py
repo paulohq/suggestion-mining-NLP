@@ -166,12 +166,15 @@ class exemplo(object):
         ext = feature_extraction()
         ext.create_model_word2vec(tokenized_corpus, 10, 10, 2, 1e-3)
 
+
 exem = exemplo()
 print("Original corpus:")
 print(exem.corpus)
 exem.filtered_list_expand_contractions = [exem.expand_contractions(text, contractions_dict) for text in exem.corpus]
 print("Expand contractions:")
 print(exem.filtered_list_expand_contractions)
+
+
 
 
 exem.token_list = [exem.tokenize_text(text) for text in exem.filtered_list_expand_contractions]

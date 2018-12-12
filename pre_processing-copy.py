@@ -87,24 +87,21 @@ class pre_processing(object):
         return filtered_tokens
 
     #Convert tokens to lowercase.
-    def lower_case(self, text):
-        lower_token_list = text.lower()
+    def lower_case(self, token_list):
+        lower_token_list = [token.lower() for token in token_list]
         return lower_token_list
 
-    #Remove the stopwords from the text.
-    def remove_stopwords(self, text):
-        tokens = self.tokenize_text1(text)
-        filtered_tokens = [token for token in tokens if token not in
-                            self.stopword_list]
-        filtered_text = ' '.join(filtered_tokens)
-        return filtered_text
+    #Remove the stopwords from the token list.
+    def remove_stopwords(self, tokens):
+        stopword_list = nltk.corpus.stopwords.words('english')
+        filtered_tokens = [token for token in tokens if token not in stopword_list]
+        return filtered_tokens
 
     #Remove the repeated characters from the token list.
     #Identify repeated characters in a word using a regex pattern and then use a substitution to remove the characters one by one.
-    def remove_repeated_characters(self, text):
+    def remove_repeated_characters(self, tokens):
         repeat_pattern = re.compile(r'(\w*)(\w)\2(\w*)')
         match_substitution = r'\1\2\3'
-        tokens = self.tokenize_text1(text)
         def replace(old_word):
             if wordnet.synsets(old_word):
                 return old_word
@@ -113,8 +110,7 @@ class pre_processing(object):
             return replace(new_word) if new_word != old_word else new_word
 
         correct_tokens = [replace(word) for word in tokens]
-        filtered_text = ' '.join(correct_tokens)
-        return filtered_text
+        return correct_tokens
 
     #Stemming the tokens.
     def lancaster_stemmer(self, tokens):
@@ -137,7 +133,7 @@ class pre_processing(object):
 
 
     #Convert the tokens to your radical (root word) using tokens POS-tag before lemmatizing.
-    def lemmatizer(self, text):
+    def lemmatizer(self, tokens):
         wnl = WordNetLemmatizer()
 
         def POS_tag(token):
@@ -146,7 +142,7 @@ class pre_processing(object):
             wntag = wntag if wntag in ['a', 'r', 'n', 'v'] else None
             return wntag
 
-        lemma_tokens = wnl.lemmatize(text, self.get_pos(text))
+        lemma_tokens = [wnl.lemmatize(token, self.get_pos(token)) for token in tokens]
 
         #lemma_tokens = [wnl.lemmatize(token, POS_tag(token)) if POS_tag(token) else token for token in tokens]
         return lemma_tokens
