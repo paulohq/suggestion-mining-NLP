@@ -91,6 +91,11 @@ tfidf_wv_test_features = extract.tfidf_weighted_averaged_word_vectorizer(corpus=
 mnb = MultinomialNB()
 svm = SGDClassifier(loss='hinge', n_iter=100)
 
+rdf = RandomForestClassifier(n_estimators=200, max_depth=3, random_state=0)
+svc = LinearSVC()
+lr =  LogisticRegression(random_state=0)
+
+
 # Multinomial Naive Bayes with bag of words features
 mnb_bow_predictions = clas.train_predict_evaluate_model(classifier=mnb, train_features=bow_train_features, train_labels=train_labels,
                                                    test_features=bow_test_features, test_labels=test_labels)
