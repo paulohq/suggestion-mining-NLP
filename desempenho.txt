@@ -1,0 +1,50 @@
+441
+587
+524 406 518 491 450 529 435 497 518 460 388 500 486 475 477 462 474 472 477 466 464 482 452 443 532
+415 415 417 415 416 419 415 417 419 415 416 414 414 414 414 414 414 414 414 414 414 414 414 416 414
+425 424 424 424 425 427 426 424 424 425 425 426 426 426 426 426 426 426 426 426 426 426 426 425 426
+504 505 548 424 493 569 539 437 534 461 512 446 461 461 453 463 436 473 426 432 412 412 449 407 481
+
+2- 100 features e 50 iterações
+3- 100 features e 200 iterações
+4- 100 features e 500 iterações
+5- 200 features e 50 iterações
+6- size = num_features = 50 window_size = 3 min_count = 3
+epochs = 10 learning_rate = 0.0025 negative_sample= 5
+7- size = num_features = 100 window_size = 7 min_count = 3
+epochs = 50 learning_rate = 0.025 negative_sample= 5
+8- size = num_features = 100 window_size = 10 min_count = 3
+epochs = 50 learning_rate = 0.025 negative_sample= 5
+9- retirado o parâmetro learning_rate
+10- size = num_features = 200 window_size = 10 min_count = 3
+epochs = 50 learning_rate = 0.025 negative_sample= 5
+11- size = num_features = 200 window_size = 10 min_count = 0
+epochs = 50 learning_rate = 0.025 negative_sample= 5
+12- size = num_features = 200 window_size = 10 min_count = 0
+epochs = 50 learning_rate = 0.025 negative_sample= 5
+13- size = num_features = 300 window_size = 10 min_count = 0
+epochs = 50 learning_rate = 0.025 negative_sample= 5
+14- size = num_features = 300 window_size = 10 min_count = 0
+epochs = 60 learning_rate = 0.025 negative_sample= 5
+15- size = num_features = 200 window_size = 10 min_count = 0
+epochs = 60 learning_rate = 0.025 negative_sample= 5
+16- size = num_features = 200 window_size = 10 min_count = 0
+epochs = 70 learning_rate = 0.025 negative_sample= 5
+17- size = num_features = 200 window_size = 10 min_count = 0
+epochs = 80 learning_rate = 0.025 negative_sample= 5
+18- size = num_features = 200 window_size = 10 min_count = 0
+epochs = 100 learning_rate = 0.025 negative_sample= 5
+19- size = num_features = 250 window_size = 10 min_count = 0
+epochs = 100 learning_rate = 0.025 negative_sample= 5
+20- size = num_features = 300 window_size = 10 min_count = 0
+epochs = 100 learning_rate = 0.025 negative_sample= 5
+20- size = num_features = 500 window_size = 10 min_count = 0
+epochs = 100 learning_rate = 0.025 negative_sample= 5
+21- size = num_features = 500 window_size = 10 min_count = 0
+epochs = 200 learning_rate = 0.025 negative_sample= 5
+22- size = num_features = 500 window_size = 10 min_count = 0
+epochs = 100 learning_rate = 0.025 negative_sample= 5
+23- size = num_features = 500 window_size = 20 min_count = 0
+epochs = 1000 learning_rate = 0.025 negative_sample= 5
+24- size = num_features = 100 window_size = 5 min_count = 0
+epochs = 200 learning_rate = 0.025 negative_sample= 5

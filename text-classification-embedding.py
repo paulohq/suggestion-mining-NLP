@@ -6,6 +6,9 @@ from read_csv import *
 from contractions import contractions_dict
 from classification import *
 
+from numpy.random import seed
+seed(7)  # Define uma semente para a reprodutibilidade dos resultados do modelo.
+
 class text_classification(object):
     def __init__(self):
 
@@ -47,7 +50,7 @@ test_corpus = []
 test_labels = []
 for text in classifier.test_list:
     test_corpus.append(text[1])
-    test_labels.append('0')
+    test_labels.append('1')
 
 norm_train_corpus = proc.normalize_corpus(train_corpus)
 norm_test_corpus = proc.normalize_corpus(test_corpus)
@@ -66,30 +69,47 @@ tokenized_train = [nltk.word_tokenize(text)
                    for text in norm_train_corpus]
 tokenized_test = [nltk.word_tokenize(text)
                    for text in norm_test_corpus]
+
+size = num_features = 100
+window_size = 5
+min_count = 0
+epochs = 200
+learning_rate = 0.025
+negative_sample= 5
 # build word2vec model
+#Original com 55% no SVM predictions
+#model = gensim.models.Word2Vec(tokenized_train,
+#                               size=500,
+#                               window=100,
+#                               min_count=30,
+#                               sample=1e-3)
 model = gensim.models.Word2Vec(tokenized_train,
-                               size=500,
-                               window=100,
-                               min_count=30,
-                               sample=1e-3)
+                               size=size,
+                               window=window_size,
+                               min_count=min_count,
+                               sample=1e-3,
+                               iter=epochs,
+                               alpha=learning_rate,
+                               seed=seed(7),
+                               sg=0,hs=0,negative=negative_sample,cbow_mean=1)
 # averaged word vector features
 avg_wv_train_features = extract.averaged_word_vectorizer(corpus=tokenized_train,
                                                  model=model,
-                                                 num_features=500)
+                                                 num_features=num_features)
 avg_wv_test_features = extract.averaged_word_vectorizer(corpus=tokenized_test,
                                                 model=model,
-                                                num_features=500)
+                                                num_features=num_features)
 
 # tfidf weighted averaged word vector features
 vocab = tfidf_vectorizer.vocabulary_
 tfidf_wv_train_features = extract.tfidf_weighted_averaged_word_vectorizer(corpus=tokenized_train, tfidf_vectors= tfidf_train_features,
-                                                                  tfidf_vocabulary=vocab, model=model,num_features=500)
+                                                                  tfidf_vocabulary=vocab, model=model,num_features=num_features)
 tfidf_wv_test_features = extract.tfidf_weighted_averaged_word_vectorizer(corpus=tokenized_test,tfidf_vectors=tfidf_test_features,
-                                                                  tfidf_vocabulary=vocab, model=model,num_features=500)
+                                                                  tfidf_vocabulary=vocab, model=model,num_features=num_features)
 
 
 mnb = MultinomialNB()
-svm = SGDClassifier(loss='hinge', n_iter=100)
+svm = SGDClassifier(loss='hinge', n_iter=200)
 
 rdf = RandomForestClassifier(n_estimators=200, max_depth=3, random_state=0)
 svc = LinearSVC()
